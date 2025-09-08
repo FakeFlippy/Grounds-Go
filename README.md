@@ -1,4 +1,4 @@
-# UVA Transit App 🚌
+# GroundsGo 🚌
 
 A unified, real-time transit tracker for University of Virginia and Charlottesville that integrates UVA and city bus lines with AI-powered trip planning.
 
@@ -70,8 +70,8 @@ This project is currently in development. Key milestones:
 ### Installation
 1. Clone the repository:
    ```bash
-   git clone https://github.com/YourUsername/UVATransitApp.git
-   cd UVATransitApp
+   git clone https://github.com/YourUsername/GroundsGo.git
+   cd GroundsGo
    ```
 
 2. Install dependencies:

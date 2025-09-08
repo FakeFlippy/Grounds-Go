@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "UVATransitApp",
-    "slug": "UVATransitApp",
+    "name": "GroundsGo",
+    "slug": "groundsgo",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
