@@ -7,12 +7,16 @@ import {
   Alert,
   ActivityIndicator,
   Platform,
+  ScrollView,
+  Dimensions,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import LocationService from '../services/LocationService';
 
 // Temporarily disable MapView for testing
 // import MapView, { Marker, Polyline } from 'react-native-maps';
+
+const { height: screenHeight } = Dimensions.get('window');
 
 export default function MapScreen() {
   const [location, setLocation] = useState(null);
@@ -157,98 +161,117 @@ export default function MapScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Temporary placeholder for map - will be replaced with actual MapView once dependencies are fixed */}
-      <View style={styles.mapPlaceholder}>
-        <View style={styles.mapHeader}>
-          <Ionicons name="map" size={40} color="#FF6B35" />
-          <Text style={styles.mapTitle}>GroundsGo Live Map</Text>
-          <Text style={styles.mapSubtitle}>UVA & Charlottesville Transit</Text>
-          
-          {/* Location Status */}
-          <View style={styles.locationStatus}>
-            {locationLoading ? (
-              <View style={styles.locationItem}>
-                <ActivityIndicator size="small" color="#FF6B35" />
-                <Text style={styles.locationText}>Getting your location...</Text>
-              </View>
-            ) : location ? (
-              <View style={styles.locationItem}>
-                <Ionicons name="location" size={16} color="#34C759" />
-                <Text style={styles.locationText}>
-                  {LocationService.isInServiceArea(location) ? 'In service area' : 'Outside service area'}
-                </Text>
-              </View>
-            ) : (
-              <View style={styles.locationItem}>
-                <Ionicons name="location-outline" size={16} color="#FF3B30" />
-                <Text style={styles.locationText}>Location unavailable</Text>
-              </View>
-            )}
+      {/* Map Section - Top Half */}
+      <View style={styles.mapSection}>
+        {/* Map Placeholder */}
+        <View style={styles.mapContainer}>
+          <View style={styles.mapPlaceholder}>
+            <Ionicons name="map" size={60} color="#FF6B35" />
+            <Text style={styles.mapTitle}>GroundsGo Live Map</Text>
+            <Text style={styles.mapSubtitle}>Interactive map coming soon</Text>
             
-            {locationAddress && (
-              <Text style={styles.addressText}>{locationAddress}</Text>
-            )}
+            {/* Location Status Overlay */}
+            <View style={styles.locationOverlay}>
+              {locationLoading ? (
+                <View style={styles.locationItem}>
+                  <ActivityIndicator size="small" color="#FF6B35" />
+                  <Text style={styles.locationText}>Getting location...</Text>
+                </View>
+              ) : location ? (
+                <View style={styles.locationItem}>
+                  <Ionicons name="location" size={14} color="#34C759" />
+                  <Text style={styles.locationText}>
+                    {LocationService.isInServiceArea(location) ? 'In service area' : 'Outside service area'}
+                  </Text>
+                </View>
+              ) : (
+                <View style={styles.locationItem}>
+                  <Ionicons name="location-outline" size={14} color="#FF3B30" />
+                  <Text style={styles.locationText}>Location unavailable</Text>
+                </View>
+              )}
+            </View>
+          </View>
+          
+          {/* Map Control Buttons */}
+          <View style={styles.mapControls}>
+            <TouchableOpacity 
+              style={[styles.mapControlButton, locationLoading && styles.controlButtonDisabled]} 
+              onPress={centerOnUser}
+              disabled={locationLoading}
+            >
+              {locationLoading ? (
+                <ActivityIndicator size="small" color="#FF6B35" />
+              ) : (
+                <Ionicons name="locate" size={20} color="#FF6B35" />
+              )}
+            </TouchableOpacity>
+            
+            <TouchableOpacity style={styles.mapControlButton} onPress={() => setBuses(mockBuses)}>
+              <Ionicons name="refresh" size={20} color="#FF6B35" />
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+
+      {/* Bus List Section - Bottom Half */}
+      <View style={styles.busListSection}>
+        <View style={styles.busListHeader}>
+          <Text style={styles.busListTitle}>Live Buses</Text>
+          <View style={styles.busCounter}>
+            <Text style={styles.busCountText}>{buses.length} tracked</Text>
           </View>
         </View>
         
-        <View style={styles.busListContainer}>
-          <Text style={styles.busListTitle}>Live Bus Tracking</Text>
-          {buses.map((bus) => (
-            <View key={bus.id} style={styles.busItem}>
-              <View style={[styles.busIndicator, { backgroundColor: getBusIcon(bus.route) }]}>
-                <Ionicons name="bus" size={16} color="white" />
-              </View>
-              <View style={styles.busDetails}>
-                <Text style={styles.busName}>{bus.name}</Text>
-                <Text style={styles.busRoute}>{bus.route}</Text>
-                <Text style={styles.busEta}>Next: {bus.nextStop} • {bus.eta}</Text>
-              </View>
-            </View>
-          ))}
-        </View>
-        
-        <Text style={styles.comingSoonText}>
-          📍 Interactive map coming soon!{'\n'}
-          Currently showing live bus data in list format.
-        </Text>
-      </View>
-
-      {/* Loading overlay */}
-      {loading && (
-        <View style={styles.loadingOverlay}>
-          <ActivityIndicator size="large" color="#FF6B35" />
-          <Text style={styles.loadingText}>Loading live bus data...</Text>
-        </View>
-      )}
-
-      {/* Control buttons */}
-      <View style={styles.controls}>
-        <TouchableOpacity 
-          style={[styles.controlButton, locationLoading && styles.controlButtonDisabled]} 
-          onPress={centerOnUser}
-          disabled={locationLoading}
+        <ScrollView 
+          style={styles.busScrollView}
+          contentContainerStyle={styles.busScrollContent}
+          showsVerticalScrollIndicator={false}
         >
-          {locationLoading ? (
-            <ActivityIndicator size="small" color="#FF6B35" />
+          {loading ? (
+            <View style={styles.busLoadingContainer}>
+              <ActivityIndicator size="large" color="#FF6B35" />
+              <Text style={styles.busLoadingText}>Loading live bus data...</Text>
+            </View>
+          ) : buses.length > 0 ? (
+            buses.map((bus) => (
+              <TouchableOpacity key={bus.id} style={styles.busCard}>
+                <View style={styles.busCardHeader}>
+                  <View style={[styles.busIndicator, { backgroundColor: getBusIcon(bus.route) }]}>
+                    <Ionicons name="bus" size={18} color="white" />
+                  </View>
+                  <View style={styles.busInfo}>
+                    <Text style={styles.busName}>{bus.name}</Text>
+                    <Text style={styles.busRoute}>{bus.route}</Text>
+                  </View>
+                  <View style={styles.busEtaContainer}>
+                    <Text style={styles.busEta}>{bus.eta}</Text>
+                    <Text style={styles.busEtaLabel}>ETA</Text>
+                  </View>
+                </View>
+                
+                <View style={styles.busDetails}>
+                  <View style={styles.busDetailItem}>
+                    <Ionicons name="location-outline" size={14} color="#8E8E93" />
+                    <Text style={styles.busDetailText}>Next: {bus.nextStop}</Text>
+                  </View>
+                  <TouchableOpacity style={styles.trackButton}>
+                    <Ionicons name="navigate" size={14} color="#FF6B35" />
+                    <Text style={styles.trackButtonText}>Track</Text>
+                  </TouchableOpacity>
+                </View>
+              </TouchableOpacity>
+            ))
           ) : (
-            <Ionicons name="locate" size={24} color="#FF6B35" />
+            <View style={styles.noBusesContainer}>
+              <Ionicons name="bus-outline" size={48} color="#8E8E93" />
+              <Text style={styles.noBusesText}>No buses currently tracked</Text>
+              <TouchableOpacity style={styles.refreshButton} onPress={() => setBuses(mockBuses)}>
+                <Text style={styles.refreshButtonText}>Refresh</Text>
+              </TouchableOpacity>
+            </View>
           )}
-        </TouchableOpacity>
-        
-        <TouchableOpacity style={styles.controlButton} onPress={() => setBuses(mockBuses)}>
-          <Ionicons name="refresh" size={24} color="#FF6B35" />
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.controlButton} onPress={initializeLocation}>
-          <Ionicons name="location" size={24} color="#FF6B35" />
-        </TouchableOpacity>
-      </View>
-
-      {/* Bus count indicator */}
-      <View style={styles.busCounter}>
-        <Text style={styles.busCountText}>
-          {buses.length} buses tracked
-        </Text>
+        </ScrollView>
       </View>
     </View>
   );
@@ -259,74 +282,136 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#000000',
   },
+  // Map Section Styles
+  mapSection: {
+    height: screenHeight * 0.5, // Top 50% of screen
+    backgroundColor: '#1C1C1E',
+  },
+  mapContainer: {
+    flex: 1,
+    position: 'relative',
+  },
   mapPlaceholder: {
     flex: 1,
-    padding: 20,
-  },
-  mapHeader: {
+    justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 30,
-    paddingTop: 20,
+    backgroundColor: '#2C2C2E',
   },
   mapTitle: {
     color: '#FFFFFF',
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: 'bold',
     marginTop: 10,
   },
   mapSubtitle: {
     color: '#8E8E93',
-    fontSize: 16,
+    fontSize: 14,
     marginTop: 5,
   },
-  locationStatus: {
-    marginTop: 20,
-    alignItems: 'center',
+  locationOverlay: {
+    position: 'absolute',
+    top: 20,
+    left: 20,
+    backgroundColor: 'rgba(28, 28, 30, 0.9)',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
   },
   locationItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 5,
   },
   locationText: {
     color: '#FFFFFF',
-    fontSize: 14,
-    marginLeft: 8,
+    fontSize: 12,
+    marginLeft: 6,
     fontWeight: '500',
   },
-  addressText: {
-    color: '#8E8E93',
-    fontSize: 12,
-    textAlign: 'center',
-    marginTop: 5,
-    paddingHorizontal: 20,
+  mapControls: {
+    position: 'absolute',
+    right: 20,
+    top: 20,
+    flexDirection: 'column',
   },
-  busListContainer: {
-    flex: 1,
+  mapControlButton: {
+    backgroundColor: 'rgba(28, 28, 30, 0.9)',
+    borderRadius: 22,
+    width: 44,
+    height: 44,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 8,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  controlButtonDisabled: {
+    opacity: 0.6,
+  },
+  // Bus List Section Styles
+  busListSection: {
+    flex: 1, // Bottom 50% of screen
+    backgroundColor: '#000000',
+  },
+  busListHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#38383A',
   },
   busListTitle: {
     color: '#FFFFFF',
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 15,
+    fontSize: 20,
+    fontWeight: 'bold',
   },
-  busItem: {
+  busCounter: {
+    backgroundColor: '#1C1C1E',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 15,
+  },
+  busCountText: {
+    color: '#8E8E93',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  busScrollView: {
+    flex: 1,
+  },
+  busScrollContent: {
+    padding: 20,
+  },
+  // Bus Card Styles
+  busCard: {
+    backgroundColor: '#1C1C1E',
+    borderRadius: 15,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#38383A',
+  },
+  busCardHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#1C1C1E',
-    padding: 15,
-    borderRadius: 12,
-    marginBottom: 10,
+    marginBottom: 12,
   },
   busIndicator: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 15,
+    marginRight: 12,
   },
-  busDetails: {
+  busInfo: {
     flex: 1,
   },
   busName: {
@@ -340,81 +425,84 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     marginTop: 2,
   },
+  busEtaContainer: {
+    alignItems: 'flex-end',
+  },
   busEta: {
-    color: '#8E8E93',
-    fontSize: 14,
-    marginTop: 4,
+    color: '#34C759',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
-  comingSoonText: {
+  busEtaLabel: {
     color: '#8E8E93',
-    fontSize: 14,
-    textAlign: 'center',
-    marginTop: 20,
-    lineHeight: 20,
+    fontSize: 11,
+    marginTop: 2,
   },
-  loadingOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    justifyContent: 'center',
+  busDetails: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
   },
-  loadingText: {
-    color: '#FFFFFF',
+  busDetailItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  busDetailText: {
+    color: '#8E8E93',
+    fontSize: 14,
+    marginLeft: 6,
+  },
+  trackButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#2C2C2E',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 15,
+    borderWidth: 1,
+    borderColor: '#FF6B35',
+  },
+  trackButtonText: {
+    color: '#FF6B35',
+    fontSize: 12,
+    fontWeight: '600',
+    marginLeft: 4,
+  },
+  // Loading and Empty States
+  busLoadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 60,
+  },
+  busLoadingText: {
+    color: '#8E8E93',
     fontSize: 16,
-    marginTop: 10,
+    marginTop: 12,
     fontWeight: '500',
   },
-  controls: {
-    position: 'absolute',
-    right: 20,
-    top: 100,
-    flexDirection: 'column',
-  },
-  controlButton: {
-    backgroundColor: '#1C1C1E',
-    borderRadius: 25,
-    width: 50,
-    height: 50,
+  noBusesContainer: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 10,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+    paddingVertical: 60,
   },
-  controlButtonDisabled: {
-    opacity: 0.6,
+  noBusesText: {
+    color: '#8E8E93',
+    fontSize: 16,
+    marginTop: 12,
+    marginBottom: 20,
   },
-  busMarker: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: '#FFFFFF',
-  },
-  busCounter: {
-    position: 'absolute',
-    bottom: 120,
-    left: 20,
-    backgroundColor: '#1C1C1E',
-    paddingHorizontal: 15,
-    paddingVertical: 8,
+  refreshButton: {
+    backgroundColor: '#FF6B35',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
     borderRadius: 20,
   },
-  busCountText: {
+  refreshButtonText: {
     color: '#FFFFFF',
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: '600',
   },
 });
