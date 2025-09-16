@@ -29,20 +29,12 @@ Our platform provides a unified, real-time transit tracker that integrates UVA a
 - **Arrival Time Planning**: Enter your desired arrival time for tailored suggestions
 
 ### 📱 User Experience
-- **Clean, Modern Interface**: Intuitive design optimized for students
 - **Real-Time Updates**: Live notifications about delays and route changes
 - **Favorite Routes**: Save frequently used routes for quick access
-- **Campus Integration**: Designed specifically for UVA students and visitors
-
-## 🎓 Target Audience
-
-- **Primary**: UVA students, faculty, and staff
-- **Secondary**: Charlottesville residents and visitors
-- **Future**: Other university campuses with similar transit challenges
 
 ## 🚀 Technology Stack
 
-- **Framework**: React Native with Expo SDK 53
+- **Framework**: React Native with Expo SDK 54
 - **Maps**: React Native Maps with real-time GPS tracking
 - **Navigation**: React Navigation for seamless user experience
 - **Backend**: Real-time APIs for transit data integration
@@ -88,12 +80,4 @@ This project is currently in development. Key milestones:
 
 ## 🤝 Contributing
 
-We welcome contributions from the UVA community! Please feel free to submit issues, feature requests, or pull requests.
-
-## 📄 License
-
-This project is open source and available under the [MIT License](LICENSE).
-
----
-
-**Built with ❤️ for the UVA community**
+We welcome contributions from the UVA community! Please feel free to submit issues, feature requests, or pull requests to gbf9gr@virginia.edu
